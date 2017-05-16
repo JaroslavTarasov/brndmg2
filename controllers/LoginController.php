@@ -24,10 +24,10 @@ class LoginController extends Controller
         return [
             'access' => [
                 'class' => AccessControl::className(),
-                'only' => ['update', 'view'],
+                'only' => ['update', 'view', 'index'],
                 'rules' => [
                     [
-                        'actions' => ['update', 'view'],
+                        'actions' => ['update', 'view', 'index'],
                         'allow' => true,
                         'roles' => ['@'],
                     ],
