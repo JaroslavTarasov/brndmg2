@@ -12,6 +12,11 @@ use app\models\BalanceForm;
 ?>
 <div class="login-balance">
 
+    <?php if (Yii::$app->session->hasFlash('error')): ?>
+        <div class="info">
+            <h3><font color="red"><?php echo Yii::$app->session->getFlash('error'); ?></font></h3>
+        </div>
+    <?php endif; ?>
     <h1><?= Html::encode('Текущий баланс') ?></h1>
 
     <?php

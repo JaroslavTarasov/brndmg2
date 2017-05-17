@@ -38,6 +38,10 @@ class BalanceForm extends Model
     {
         if ($this->validate()) {
             $bal = Login::findOne(Yii::$app->user->getId());
+            if (empty($this->balance)) {
+                Yii::$app->session->setFlash('error', "Вы не ввели сумму для отправки");
+                return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
+            }
             $bal->balance += $this->balance;
             $bal->save();
             return $bal;
@@ -50,10 +54,8 @@ class BalanceForm extends Model
         if ($this->validate()) {
             $desc = Login::findOne(Yii::$app->user->getId());
             if (empty($this->balance)) {
-                throw new UserException('Вы не ввели сумму для отправки');
-                //Yii::$app->session->setFlash('contactFormSubmitted');
-
-
+                Yii::$app->session->setFlash('error', "Вы не ввели сумму для отправки");
+                return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
             } elseif ($desc->balance >= $this->balance) {
                 $desc->balance -= $this->balance;
                 $desc->save();
@@ -67,8 +69,10 @@ class BalanceForm extends Model
                 $log->date = new \yii\db\Expression('NOW()');
                 $log->save();
             } else {
-                throw new UserException('Вы пытаетесь отправить больше, чем имеете');
+                Yii::$app->session->setFlash('error1', "Вы пытаетесь отправить больше, чем имеете");
+                return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
             }
+            Yii::$app->session->setFlash('success', "Сумма отправлена!");
             return $desc && $inc && $log;
         }
         return 0;

@@ -11,7 +11,8 @@ $config = [
             'class' => 'yii\web\UrlManager',
             'showScriptName' => false,
             'enablePrettyUrl' => true,
-            'rules' => ['<alias:login|signup>' => 'site/<alias>',
+            'rules' => [
+                '<alias:login|signup>' => 'site/<alias>',
                 '<alias:balance|sendbalance>' => 'balance/<alias>',
                 '<alias:view/<id:\d+>>' => 'login/<alias>',
                 '<alias:index>' => 'login/<alias>',

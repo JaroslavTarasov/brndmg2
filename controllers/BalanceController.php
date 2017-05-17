@@ -43,8 +43,7 @@ class BalanceController extends Controller
         if ($model->load(Yii::$app->request->post())) {
             if ($user = $model->sendbal()) {
             }
-            Yii::$app->session->setFlash('success', "Сумма отправлена!");
-            return $this->redirect(\Yii::$app->urlManager->createUrl("logs/index"));
+            return $this->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
         }
 
         return $this->render('sendbalance', [
