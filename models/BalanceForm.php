@@ -53,6 +53,8 @@ class BalanceForm extends Model
     {
         if ($this->validate()) {
             $desc = Login::findOne(Yii::$app->user->getId());
+            //session_write_close();
+            //sleep(1);
             if (empty($this->balance)) {
                 Yii::$app->session->setFlash('error', "Вы не ввели сумму для отправки");
                 return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));

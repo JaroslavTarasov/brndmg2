@@ -3,8 +3,8 @@
 
 # db.php
 
-/config/db.php
-/config/test_db.php
+config/db.php
+config/test_db.php
 
 # netbeans project files
 nbproject
