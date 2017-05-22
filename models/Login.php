@@ -15,10 +15,11 @@ use yii\db\ActiveRecord;
  * @property string $passwordenc
  * @property string $username
  * @property string $balance
+ * @property string $filename
+ * @property array $avatar
  */
 class Login extends \yii\db\ActiveRecord implements IdentityInterface
 {
-
     public static function tableName()
     {
         return 'login';
@@ -28,7 +29,6 @@ class Login extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             [['name', 'surname', 'username', 'mail', 'passwordenc'], 'string', 'max' => 128],
-            [['password'], 'string', 'max' => 16],
             [['balance'], 'number'],
         ];
     }
@@ -40,7 +40,7 @@ class Login extends \yii\db\ActiveRecord implements IdentityInterface
             'name' => 'Имя',
             'surname' => 'Фамилия',
             'passwordenc' => 'Пароль',
-            'password' => 'Password',
+            'password' => 'Аватар',
             'username' => 'Имя пользователя',
             'mail' => 'E-mail',
             'balance' => 'Баланс'
@@ -92,4 +92,4 @@ class Login extends \yii\db\ActiveRecord implements IdentityInterface
         $this->passwordenc = Yii::$app->security->generatePasswordHash($password);
     }
 
-    }
+}

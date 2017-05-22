@@ -51,32 +51,41 @@ class BalanceForm extends Model
 
     public function sendbal()
     {
+        session_write_close();
+        sleep(1);
         if ($this->validate()) {
             $desc = Login::findOne(Yii::$app->user->getId());
-            //session_write_close();
-            //sleep(1);
+            $isolationLevel = \yii\db\Transaction::SERIALIZABLE;
             if (empty($this->balance)) {
                 Yii::$app->session->setFlash('error', "Вы не ввели сумму для отправки");
                 return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
             } elseif ($desc->balance >= $this->balance) {
-                $desc->balance -= $this->balance;
-                $desc->save();
-                $inc = Login::findOne(['username' => Yii::$app->request->post($this->username)]);
-                $inc->balance += $this->balance;
-                $inc->save();
-                $log = new Logs();
-                $log->howmuch = $this->balance;
-                $log->who = $desc->username;
-                $log->towhom = $inc->username;
-                $log->date = new \yii\db\Expression('NOW()');
-                $log->save();
-            } else {
+                $transaction = Login::getDb()->beginTransaction($isolationLevel);
+                try {
+                    $desc->balance -= $this->balance;
+                    $desc->save();
+                    $inc = Login::findOne(['username' => Yii::$app->request->post($this->username)]);
+                    $inc->balance += $this->balance;
+                    $inc->save();
+                    $transaction->commit();
+                    $log = new Logs();
+                    $log->howmuch = $this->balance;
+                    $log->who = $desc->username;
+                    $log->towhom = $inc->username;
+                    $log->date = new \yii\db\Expression('NOW()');
+                    $log->save();
+                } catch(\Throwable $e) {
+                    $transaction->rollBack();
+                    throw $e;
+                }
+            }
+             else {
                 Yii::$app->session->setFlash('error1', "Вы пытаетесь отправить больше, чем имеете");
                 return Yii::$app->response->redirect(\Yii::$app->urlManager->createUrl("balance/sendbalance"));
             }
             Yii::$app->session->setFlash('success', "Сумма отправлена!");
             return $desc && $inc && $log;
-        }
+            }
         return 0;
     }
 }

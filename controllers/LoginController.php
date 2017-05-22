@@ -4,21 +4,20 @@ namespace app\controllers;
 
 use Yii;
 use app\models\Login;
+use app\models\ImageUploadForm;
+use yii\base\UserException;
 use yii\data\ActiveDataProvider;
 use yii\filters\AccessControl;
 use yii\web\Controller;
 use yii\web\NotFoundHttpException;
 use yii\filters\VerbFilter;
 use app\models\BalanceForm;
+use yii\web\UploadedFile;
 
-/**
- * LoginController implements the CRUD actions for Login model.
- */
+
 class LoginController extends Controller
 {
-    /**
-     * @inheritdoc
-     */
+
     public function behaviors()
     {
         return [
@@ -42,11 +41,6 @@ class LoginController extends Controller
         ];
     }
 
-    /**
-     * Lists all Login models.
-     * @return mixed
-     */
-
     public function actionIndex()
     {
         $dataProvider = new ActiveDataProvider([
@@ -58,11 +52,6 @@ class LoginController extends Controller
         ]);
     }
 
-    /**
-     * Displays a single Login model.
-     * @param integer $id
-     * @return mixed
-     */
     public function actionView()
     {
         $id = Yii::$app->user->getId();
@@ -71,11 +60,6 @@ class LoginController extends Controller
         ]);
     }
 
-    /**
-     * Creates a new Login model.
-     * If creation is successful, the browser will be redirected to the 'view' page.
-     * @return mixed
-     */
     public function actionCreate()
     {
         $model = new Login();
@@ -89,34 +73,56 @@ class LoginController extends Controller
         }
     }
 
-    /**
-     * Updates an existing Login model.
-     * If update is successful, the browser will be redirected to the 'view' page.
-     * @param integer $id
-     * @return mixed
-     */
+        public function actionUpdate()
+        {
+            $id = Yii::$app->user->getId();
+            $model = $this->findModel($id);
+            $oldFile = $model->getImageFile();
+            $oldAvatar = $model->avatar;
+            $oldFileName = $model->filename;
 
-    public function actionUpdate()
+            if ($model->load(Yii::$app->request->post())) {
+                $image = $model->uploadImage();
+
+                if ($image === false) {
+                    $model->avatar = $oldAvatar;
+                    $model->filename = $oldFileName;
+                }
+
+                if ($model->save()) {
+
+                    if ($image !== false && unlink($oldFile)) {
+                        $path = $model->getImageFile();
+                        $image->saveAs($path);
+                    }
+                    return $this->redirect(['view', 'id' => $model->id]);
+                } else {
+                    throw new UserException('Spoiled');
+                }
+            }
+            return $this->render('update', [
+                'model'=>$model,
+            ]);
+        }
+
+/*    public function actionUpdate()
     {
         $id = Yii::$app->user->getId();
         $model = $this->findModel($id);
 
         if ($model->load(Yii::$app->request->post()) && $model->save()) {
-            return $this->redirect(['view', 'id' => $model->id]);
+            $model->filename = UploadedFile::getInstance($model, 'filename');
+            $model->avatar = $model->filename;
+            if ($model->uploadImage()) {
+                return $this->redirect(['view', 'id' => $model->id]);
+            }
         } else {
             return $this->render('update', [
                 'model' => $model,
             ]);
-
         }
-    }
+    }*/
 
-    /**
-     * Deletes an existing Login model.
-     * If deletion is successful, the browser will be redirected to the 'index' page.
-     * @param integer $id
-     * @return mixed
-     */
     public function actionDelete($id)
     {
         $this->findModel($id)->delete();
@@ -124,17 +130,11 @@ class LoginController extends Controller
         return $this->redirect(['index']);
     }
 
-    /**
-     * Finds the Login model based on its primary key value.
-     * If the model is not found, a 404 HTTP exception will be thrown.
-     * @param integer $id
-     * @return Login the loaded model
-     * @throws NotFoundHttpException if the model cannot be found
-     */
-    protected function findModel()
+    protected
+    function findModel()
     {
         $id = Yii::$app->user->getId();
-        if (($model = Login::findOne($id)) !== null) {
+        if (($model = ImageUploadForm::findOne($id)) !== null) {
             return $model;
         } else {
             throw new NotFoundHttpException('The requested page does not exist.');
